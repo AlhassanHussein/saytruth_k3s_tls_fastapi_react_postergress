@@ -7,7 +7,7 @@ This project utilizes a modern stack featuring **FastAPI**, **React**, and **Cad
 *   **Frontend:** [React](https://react.dev) via [Vite](https://vitejs.dev)
 *   **Reverse Proxy:** [Caddy](https://caddyserver.com) (Automatic HTTPS & SSL)
 *   **Containerization:** [Docker Compose](https://docs.docker.com)
-
+*   **Sqlite:** Sqlite 
 ---
 
 ## 🏃 Getting Started
