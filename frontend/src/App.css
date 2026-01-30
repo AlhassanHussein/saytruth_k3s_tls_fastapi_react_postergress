@@ -1,0 +1,61 @@
+.cards-skeleton .skeleton-card {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+}
+
+.main-content {
+  flex: 1;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tab Placeholder */
+.tab-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+  min-height: 60vh;
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-lg);
+  opacity: 0.5;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.tab-placeholder h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-sm);
+}
+
+.tab-placeholder p {
+  font-size: var(--font-size-base);
+  color: var(--gray-500);
+}
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

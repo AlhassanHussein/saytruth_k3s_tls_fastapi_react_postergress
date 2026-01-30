@@ -1,0 +1,38 @@
+{
+    auto_https off
+}
+
+localhost:80 {
+    log {
+        level info
+    }
+
+    # Health endpoint
+    respond /health "OK" 200
+
+    # API proxy
+    route /api/* {
+        reverse_proxy saytruth-api:8000 {
+            header_up Host "localhost"
+            header_up X-Real-IP {remote_addr}
+            header_up X-Forwarded-For {remote_addr}
+            header_up X-Forwarded-Proto "http"
+        }
+    }
+
+    # Frontend proxy - everything else except /health and /api/*
+    @notapi {
+        not path /health
+        not path /api/*
+    }
+    route @notapi {
+        reverse_proxy saytruth-app:5173 {
+            header_up Host "localhost"
+            header_up X-Real-IP {remote_addr}
+            header_up X-Forwarded-For {remote_addr}
+            header_up X-Forwarded-Proto "http"
+        }
+    }
+
+    encode gzip
+}

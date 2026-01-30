@@ -1,0 +1,126 @@
+version: '3.9'
+
+services:
+  # 1. Database Container (SQLite)
+  # Stores all application data: users, messages, links, friends
+  # Note: SQLite runs in-process, so this container is optional for debugging only
+  saytruth-db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: saytruth-database
+    volumes:
+      - ./data:/data
+    networks:
+      - saytruth-network
+    healthcheck:
+      test: ["CMD", "test", "-f", "/data/app.db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+
+  # 2. Backend Container (FastAPI)
+  # Provides REST API endpoints for auth, messages, links, users, friends
+  # Connects to SQLite database mounted via volume
+  saytruth-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: saytruth-backend
+    env_file:
+      - .env
+    environment:
+      # Database connection URL
+      - DATABASE_URL=sqlite:////data/app.db
+      # Override with env_file values above
+      - SECRET_KEY=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+      - FRONTEND_URL=${FRONTEND_URL}
+    volumes:
+      - ./backend:/app/backend
+      - ./data:/data
+    working_dir: /app/backend
+    command: sh /app/backend/start.sh
+    expose:
+      - "8000"
+    depends_on:
+      saytruth-db:
+        condition: service_started
+    networks:
+      - saytruth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # 3. Frontend Container (React + Vite)
+  # User interface for SayTruth application
+  # Connects to backend API via Nginx reverse proxy
+  saytruth-app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: saytruth-frontend
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    expose:
+      - "5173"
+    depends_on:
+      saytruth-api:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - saytruth-network
+
+  # 4. Caddy Reverse Proxy with HTTPS + Routing
+  # Single public-facing proxy that handles:
+  # - HTTPS termination (auto-generates certificates)
+  # - All routing (/api/* to backend, / to frontend)
+  # - SSL/TLS with automatic Let's Encrypt or self-signed certs
+  caddy:
+    image: caddy:alpine
+    container_name: saytruth-caddy
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - saytruth-api
+      - saytruth-app
+    networks:
+      - saytruth-network
+    environment:
+      - DOMAIN=${DOMAIN}
+      - CADDY_EMAIL=${CADDY_EMAIL:-admin@saytruth.local}
+      - AUTO_HTTPS=${AUTO_HTTPS:-off}
+
+# Persistent volumes for Caddy data and config
+volumes:
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+
+
+# Network for container communication
+# All services can communicate via service names (e.g., saytruth-api:8000)
+networks:
+  saytruth-network:
+    driver: bridge
