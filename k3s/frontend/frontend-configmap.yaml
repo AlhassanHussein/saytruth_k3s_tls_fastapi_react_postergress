@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: saytruth-dev
+data:
+  NODE_ENV: "development"
+  VITE_API_BASE_URL: "http://localhost"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: saytruth-prod
+data:
+  NODE_ENV: "production"
+  VITE_API_BASE_URL: "https://saytruth.duckdns.org"

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: saytruth-dev
+  labels:
+    name: saytruth-dev
+    environment: development

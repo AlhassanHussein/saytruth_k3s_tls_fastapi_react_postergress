@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: saytruth-api-deployment
+  labels:
+    app: saytruth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: saytruth-api
+  template:
+    metadata:
+      labels:
+        app: saytruth-api
+    spec:
+
+      containers:
+      - name: saytruth-api-container
+        image: saytruth-api:1.0
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: saytruth-config
+        - secretRef:
+            name: saytruth-secrets
+       
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: saytruth-data-pvc

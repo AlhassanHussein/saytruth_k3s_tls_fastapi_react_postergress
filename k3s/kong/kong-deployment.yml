@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+      - name: kong
+        image: kong:3.3                       # official Kong image
+        env:
+        - name: KONG_DATABASE
+          value: "off"                        # DB-less mode
+        - name: KONG_DECLARATIVE_CONFIG
+          value: "/kong/kong-config.yaml"    # mount path
+        - name: KONG_PROXY_ACCESS_LOG
+          value: "/dev/stdout"
+        - name: KONG_ADMIN_ACCESS_LOG
+          value: "/dev/stdout"
+        - name: KONG_PROXY_ERROR_LOG
+          value: "/dev/stderr"
+        - name: KONG_ADMIN_ERROR_LOG
+          value: "/dev/stderr"
+        ports:
+        - containerPort: 8000   # HTTP proxy
+        - containerPort: 8443   # HTTPS proxy
+        - containerPort: 8001   # Admin API
+        - containerPort: 8444   # Admin API HTTPS
+        volumeMounts:
+        - name: kong-config
+          mountPath: /kong/kong-config.yaml
+          subPath: kong-config.yaml
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+      volumes:
+      - name: kong-config
+        configMap:
+          name: kong-configmap

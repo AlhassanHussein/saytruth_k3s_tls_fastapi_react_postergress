@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: saytruth-data-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/lv1/live-project/secrecto_web_live_docker/data-pv
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path

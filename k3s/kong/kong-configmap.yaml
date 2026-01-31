@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: saytruth-dev
+  labels:
+    app: kong
+data:
+  kong.yaml: |
+    _format_version: "2.1"
+    services:
+      - name: backend-service
+        url: http://backend-service:8000
+        routes:
+          - name: api-route
+            paths:
+              - /api
+            strip_path: false
+      - name: frontend-service
+        url: http://frontend-service:3000
+        routes:
+          - name: frontend-route
+            paths:
+              - /
+            strip_path: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: saytruth-prod
+  labels:
+    app: kong
+data:
+  kong.yaml: |
+    _format_version: "2.1"
+    services:
+      - name: backend-service
+        url: http://backend-service:8000
+        routes:
+          - name: api-route
+            paths:
+              - /api
+            strip_path: false
+      - name: frontend-service
+        url: http://frontend-service:3000
+        routes:
+          - name: frontend-route
+            paths:
+              - /
+            strip_path: false

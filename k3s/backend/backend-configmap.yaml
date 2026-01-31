@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: saytruth-dev
+data:
+  DOMAIN: "localhost"
+  API_PORT: "8000"
+  API_HOST: "0.0.0.0"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
+  LOG_LEVEL: "INFO"
+  DEBUG: "true"
+  ENVIRONMENT: "development"
+  DATABASE_URL: "postgresql://saytruth_user:DevSecurePass123!@#@postgres-service.saytruth-dev.svc.cluster.local:5432/saytruth_db"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: saytruth-prod
+data:
+  DOMAIN: "saytruth.duckdns.org"
+  API_PORT: "8000"
+  API_HOST: "0.0.0.0"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
+  LOG_LEVEL: "INFO"
+  DEBUG: "false"
+  ENVIRONMENT: "production"
+  DATABASE_URL: "postgresql://saytruth_user:ProdSecurePass456!@#@postgres-service.saytruth-prod.svc.cluster.local:5432/saytruth_db"
